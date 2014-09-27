@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<script src="../jquery-1.7.2.min.js"></script>
+<script src="Chart.js"></script>
+<script type="text/javascript">
+ function showChart()
+ {
+	var aJson='{"Entity1":60,"Entity2":25,"Entity3":120,"Entity4":50,"Entity5":20,"Entity6":80,"Entity7":10,"Entity8":40}';
+	var aSVGElement = ChartBuddy.getBarChar(aJson);
+	$("#verticleBar").html(aSVGElement);
+ }
+</script>
+<body>
+	<button title="Show Chart" onclick=showChart();>Show Chart</button>
+	<div id="verticleBar"></div>
+</body>
+</head>
+</html>
