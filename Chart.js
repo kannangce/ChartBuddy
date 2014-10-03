@@ -41,7 +41,7 @@ function BarChart(theData)
 
 /**
 * This is what returns the whole SVG image that we see in the browser. This iterates through all the
-* This returns 3 things,
+* This returns below,
 * - The SVG elements of the containing instances of the chart.
 * - The other components of the chart such as the Vertical axis bar, Horizontal axis bar and the 
 *    background horizontal bars that shows the divisions of the units.
@@ -172,7 +172,7 @@ Bar.prototype.getPercentage=function()
 Bar.prototype.getBarElementForSVG=function()
 {
  var aRectString;
- aRectString='<rect width=' + STANDARDWIDTH + ' height=' + this.getHeight() + ' x=' + this.itsX + ' y=' + this.getY() + ' style=\"fill:'+this.itsFillColor+'\">\n';
+ aRectString='<rect id="ChartBar" width=' + STANDARDWIDTH + ' height=' + this.getHeight() + ' x=' + this.itsX + ' y=' + this.getY() + ' style=\"fill:'+this.itsFillColor+'\">\n';
  aRectString+='<title>'+this.itsName +" - "+ this.itsUnits +'</title>';
  aRectString+='<animate attributeName=y from='+(100*MULTIPLICATIONFACTOR)+' to='+this.getY()+' begin=0s dur=1.5s/>\n';
  aRectString+='<animate attributeName=height to='+this.getHeight()+' from=0 begin=0s dur=1.5s/>\n';
@@ -185,7 +185,8 @@ Bar.prototype.getBarElementForSVG=function()
 */
 Bar.prototype.getY=function()
 {
-  return this.itsOwner.getHeight()-this.getHeight();
+  // -1 ensures that the bars doesn't overlap with x-axis
+  return this.itsOwner.getHeight()-this.getHeight()-1;
 }
 
 /**
