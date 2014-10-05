@@ -218,7 +218,8 @@ Bar.prototype.getBarElementForSVG=function()
 Bar.prototype.getY=function()
 {
   if(!this.isHor) {
-// -1 ensures that the bars doesn't overlap with x-axis	return this.itsOwner.getHeight()-this.getHeight()-1;
+	// -1 ensures that the bars doesn't overlap with x-axis
+	return this.itsOwner.getHeight()-this.getHeight()-1;
   } else {
 	return this.coOrdinate;
   }
@@ -232,7 +233,7 @@ Bar.prototype.getX=function()
   if(!this.isHor) {
 	return this.coOrdinate;
   } else {
-	return 0;
+	return 1;
   }
 }
 
