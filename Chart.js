@@ -1,9 +1,9 @@
-var MULTIPLICATIONFACTOR=4;
 var STANDARDWIDTH=30;
 var GAPBETWEENBARS=20;
 var FILLCOLORS=new Array("#884411","#441188","#118844","#5050E0");
 var NUMBEROFRULERS=5;
 var RULERCOLOR = "#E0E0E0";
+var MARGIN = 50;
 
 /**
 * Class containing the utilities to get the required chart.
@@ -11,31 +11,57 @@ var RULERCOLOR = "#E0E0E0";
 function ChartBuddy()
 {
 }
-ChartBuddy.getBarChar=function(theData)
+ChartBuddy.getBarChar=function(theData,h,w)
 {
-return new BarChart(theData).getSVGImage();
+return getBarChar(theData,h,w,false);
+}
+ChartBuddy.getBarChar=function(theData,h,w,isHor)
+{
+return new BarChart(theData,h,w,isHor).getSVGImage();
 }
 
 /**
 * Class representing the Bar chart.
 */
-function BarChart(theData)
+function BarChart(theData,h,w,hor)
 {
 	this.itsEntityArray = new Array();
-	this.itsSVGImage;
-	this.itsTotalCount=0;
 	this.itsMaxUnits;
-	this.itsHeight=100;
-	aParsedJSON = JSON.parse(theData);
-	aStartx = 10;
+	this.isHor = hor;
+	var aParsedJSON = JSON.parse(theData);
+	var n = 0;
 	for(aKey in aParsedJSON)
 	{
-	  var anEntity = new Bar(aKey,aParsedJSON[aKey],this,aStartx);
+		n++;
+	}
+	var s = 0;
+	var start = 0;
+	if(!hor) {
+		s = w/(n+0.7);
+	} else {
+		s = h/(n+0.7);
+	}
+	start = 0.2*s;
+	STANDARDWIDTH = 0.6*s;
+	GAPBETWEENBARS = 0.4*s;
+	MARGIN = 0.5*s;
+	this.itsHeight=h-MARGIN;
+	this.itsWidth=w-MARGIN;
+	var coOrd = 0;
+	if(hor) {
+		start = h - start -(GAPBETWEENBARS+STANDARDWIDTH);
+	}
+	for(aKey in aParsedJSON)
+	{
+	  var anEntity = new Bar(aKey,aParsedJSON[aKey],this,start,hor);
 	  anEntity.setFillColour(FILLCOLORS[(this.itsEntityArray.length)%FILLCOLORS.length]);
 	  this.itsEntityArray.push(anEntity);
-	  this.itsTotalCount+=anEntity.itsUnits;
 	  this.itsMaxUnits=this.itsMaxUnits>anEntity.itsUnits?this.itsMaxUnits:anEntity.itsUnits;
-	  aStartx=aStartx+GAPBETWEENBARS+STANDARDWIDTH;
+	  if(!hor) {
+		start+=(GAPBETWEENBARS+STANDARDWIDTH);
+	  } else {
+		start-=(GAPBETWEENBARS+STANDARDWIDTH);
+	  }
 	}
 }
 
@@ -62,7 +88,7 @@ BarChart.prototype.getSVGImage=function()
 */
 BarChart.prototype.getBarChartWidth=function()
 {
-	return this.itsTotalCount*(STANDARDWIDTH+GAPBETWEENBARS);
+	return this.getWidth()+MARGIN;
 }
 
 /**
@@ -70,15 +96,7 @@ BarChart.prototype.getBarChartWidth=function()
 */
 BarChart.prototype.getBarChartHeight=function()
 {
-	return (100*MULTIPLICATIONFACTOR)+50;
-}
-
-/**
-* Returns the sum of units all the bars contained in this Bar Chart.
-*/
-BarChart.prototype.getTotalUnits=function()
-{
-  return this.itsTotalCount;
+	return this.getHeight()+MARGIN;
 }
 
 /**
@@ -86,7 +104,15 @@ BarChart.prototype.getTotalUnits=function()
 */
 BarChart.prototype.getHeight=function()
 {
- return this.itsHeight*MULTIPLICATIONFACTOR;
+ return this.itsHeight;
+}
+
+/**
+* Gets the total width of the Bar chart represented by this instance.
+*/
+BarChart.prototype.getWidth=function()
+{
+ return this.itsWidth;
 }	
 
 /**
@@ -106,7 +132,9 @@ BarChart.prototype.getBarGraphComponents=function()
 {
   var aComponentNodes = this.getYAxis();
   aComponentNodes+=this.getXAxis();
-  aComponentNodes+=this.getRulers();
+  if(!this.isHor) {
+	aComponentNodes+=this.getRulers();
+  }
   return aComponentNodes;
 }
 
@@ -116,7 +144,7 @@ BarChart.prototype.getBarGraphComponents=function()
 */
 BarChart.prototype.getYAxis=function()
 {
- var aYAxis = '<line x1=0 y1=0 x2=0 y2='+(100*MULTIPLICATIONFACTOR)+' style=\"stroke:rgb(255,0,0);stroke-width:2\"/>';
+ var aYAxis = '<line x1=0 y1=0 x2=0 y2='+this.getHeight()+' style=\"stroke:rgb(255,0,0);stroke-width:2\"/>';
  return aYAxis;
 }
 
@@ -125,8 +153,7 @@ BarChart.prototype.getYAxis=function()
 */
 BarChart.prototype.getXAxis=function()
 {
- var aLengthOfXAxis=(this.itsEntityArray.length *(STANDARDWIDTH+GAPBETWEENBARS))+GAPBETWEENBARS;
- var aXAxis = '<line x1=0 y1='+(100*MULTIPLICATIONFACTOR)+' x2= '+ aLengthOfXAxis +' y2='+(100*MULTIPLICATIONFACTOR)+' style=\"stroke:rgb(255,0,0);stroke-width:2\"/>';
+ var aXAxis = '<line x1=0 y1='+this.getHeight()+' x2= '+ this.getWidth() +' y2='+this.getHeight()+' style=\"stroke:rgb(255,0,0);stroke-width:2\"/>';
  return aXAxis;
 }
 
@@ -136,11 +163,11 @@ BarChart.prototype.getXAxis=function()
 BarChart.prototype.getRulers=function()
 {
   var aRulerLineSVG = "";
-  var atWidth = (100*MULTIPLICATIONFACTOR);
+  var atWidth = this.getWidth();
   var atHeight=0;
   for(var i=0;i<NUMBEROFRULERS;i++)
   {
-	atHeight = (i*(100*MULTIPLICATIONFACTOR))/(NUMBEROFRULERS);
+	atHeight = (i*this.getHeight())/(NUMBEROFRULERS);
 	aRulerLineSVG += "<line x1= " + 0 + " y1=" + atHeight + " x2=" + atWidth + " y2=" + atHeight +' style=\"stroke:'+RULERCOLOR+';stroke-width:2\"/>';
   }
   return aRulerLineSVG;
@@ -149,12 +176,13 @@ BarChart.prototype.getRulers=function()
 /**
 * Class representing each Bar in the chart.
 */
-function Bar(theName,theUnits,theOwner,theX)
+function Bar(theName,theUnits,theOwner,coOrd,hor)
 {
+	this.isHor=hor;
     this.itsName=theName;
 	this.itsUnits=theUnits;
 	this.itsOwner=theOwner;
-	this.itsX=theX;
+	this.coOrdinate=coOrd;
 }
 
 /**
@@ -172,10 +200,14 @@ Bar.prototype.getPercentage=function()
 Bar.prototype.getBarElementForSVG=function()
 {
  var aRectString;
- aRectString='<rect width=' + STANDARDWIDTH + ' height=' + this.getHeight() + ' x=' + this.itsX + ' y=' + this.getY() + ' style=\"fill:'+this.itsFillColor+'\">\n';
+ aRectString='<rect width=' + this.getWidth() + ' height=' + this.getHeight() + ' x=' + this.getX() + ' y=' + this.getY() + ' style=\"fill:'+this.itsFillColor+'\">\n';
  aRectString+='<title>'+this.itsName +" - "+ this.itsUnits +'</title>';
- aRectString+='<animate attributeName=y from='+(100*MULTIPLICATIONFACTOR)+' to='+this.getY()+' begin=0s dur=1.5s/>\n';
- aRectString+='<animate attributeName=height to='+this.getHeight()+' from=0 begin=0s dur=1.5s/>\n';
+ if(!this.isHor) {
+	 aRectString+='<animate attributeName=y from='+this.itsOwner.getHeight()+' to='+this.getY()+' begin=0s dur=1.5s/>\n';
+	 aRectString+='<animate attributeName=height from='+0+' to='+this.getHeight()+' begin=0s dur=1.5s/>\n';
+ } else {
+	 aRectString+='<animate attributeName=width from='+0+' to='+this.getWidth()+' begin=0s dur=1.5s/>\n';
+ }
  aRectString+='</rect>';
  return aRectString;
 }
@@ -185,7 +217,23 @@ Bar.prototype.getBarElementForSVG=function()
 */
 Bar.prototype.getY=function()
 {
-  return this.itsOwner.getHeight()-this.getHeight();
+  if(!this.isHor) {
+	return this.itsOwner.getHeight()-this.getHeight();
+  } else {
+	return this.coOrdinate;
+  }
+}
+
+/**
+* Gets the X of the top-left of the bar represented by this instance.
+*/
+Bar.prototype.getX=function()
+{
+  if(!this.isHor) {
+	return this.coOrdinate;
+  } else {
+	return 0;
+  }
 }
 
 /**
@@ -193,7 +241,23 @@ Bar.prototype.getY=function()
 */
 Bar.prototype.getHeight=function()
 {
-	return (this.getPercentage()*MULTIPLICATIONFACTOR);
+	if(!this.isHor) {
+		return (this.getPercentage()*this.itsOwner.getHeight()/100);
+	} else {
+		return STANDARDWIDTH;
+	}
+}
+
+/**
+* Gets the width of the bar represented by this instance.
+*/
+Bar.prototype.getWidth=function()
+{
+	if(!this.isHor) {
+		return STANDARDWIDTH;
+	} else {
+		return (this.getPercentage()*this.itsOwner.getWidth()/100);
+	}
 }
 
 /**

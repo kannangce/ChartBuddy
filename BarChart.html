@@ -5,16 +5,19 @@
 <script src="jquery-2.1.1.js"></script>
 <script src="Chart.js"></script>
 <script type="text/javascript">
- function showChart()
+  function showChart(isHor, id)
  {
 	var aJson='{"Entity1":60,"Entity2":25,"Entity3":120,"Entity4":50,"Entity5":20,"Entity6":80,"Entity7":10,"Entity8":40}';
-	var aSVGElement = ChartBuddy.getBarChar(aJson);
-	$("#verticleBar").html(aSVGElement);
+	var aSVGElement = ChartBuddy.getBarChar(aJson,300,300,isHor);
+	$("#"+id).html(aSVGElement);
  }
 </script>
 <body>
-	<button title="Show Chart" onclick=showChart();>Show Chart</button>
-	<div id="verticleBar"></div>
+	<button title="Show Chart" onclick=showChart(false,'verticleBar');>Show Vertical Chart</button>
+	<button title="Show Chart" onclick=showChart(true,'horizontalBar');>Show Horizontal Chart</button>
+	<br/>
+	<div id="verticleBar" style="float:left"></div>
+	<div id="horizontalBar"></div>
 </body>
 </head>
 </html>
