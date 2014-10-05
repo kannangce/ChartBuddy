@@ -1,0 +1,6 @@
+#ChartBar:hover
+{
+	opacity: 0.8;
+	stroke: #ef0000;
+	stroke-width: 2px;
+}
