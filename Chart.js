@@ -132,9 +132,7 @@ BarChart.prototype.getBarGraphComponents=function()
 {
   var aComponentNodes = this.getYAxis();
   aComponentNodes+=this.getXAxis();
-  if(!this.isHor) {
-	aComponentNodes+=this.getRulers();
-  }
+  aComponentNodes+=this.getRulers();
   return aComponentNodes;
 }
 
@@ -163,12 +161,25 @@ BarChart.prototype.getXAxis=function()
 BarChart.prototype.getRulers=function()
 {
   var aRulerLineSVG = "";
-  var atWidth = this.getWidth();
+  var atWidth = 0;
   var atHeight=0;
-  for(var i=0;i<NUMBEROFRULERS;i++)
+  if(!this.isHor)
   {
-	atHeight = (i*this.getHeight())/(NUMBEROFRULERS);
-	aRulerLineSVG += "<line x1= " + 0 + " y1=" + atHeight + " x2=" + atWidth + " y2=" + atHeight +' style=\"stroke:'+RULERCOLOR+';stroke-width:2\"/>';
+	atWidth = this.getWidth();
+	  for(var i=0;i<NUMBEROFRULERS;i++)
+	  {
+		atHeight = (i*this.getHeight())/(NUMBEROFRULERS);
+		aRulerLineSVG += "<line x1= " + 0 + " y1=" + atHeight + " x2=" + atWidth + " y2=" + atHeight +' style=\"stroke:'+RULERCOLOR+';stroke-width:2\"/>';
+	  }
+  }
+  else
+  {
+	atHeight= this.getHeight();
+	  for(var i=0;i<NUMBEROFRULERS;i++)
+	  {
+		atWidth = (i*this.getWidth())/(NUMBEROFRULERS);
+		aRulerLineSVG += "<line x1= " + atWidth + " y1=" + 0 + " x2=" + atWidth + " y2=" + atHeight +' style=\"stroke:'+RULERCOLOR+';stroke-width:2\"/>';
+	  }
   }
   return aRulerLineSVG;
 }
