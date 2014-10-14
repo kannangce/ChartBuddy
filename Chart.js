@@ -33,7 +33,12 @@ function BarChart(theData,h,w,hor)
 	for(aKey in aParsedJSON)
 	{
 		n++;
+		var anEntity = new Bar(aKey,aParsedJSON[aKey],this,hor);
+		this.itsEntityArray.push(anEntity);
 	}
+
+	this.itsEntityArray.sort(this.barComparator);
+
 	var s = 0;
 	var start = 0;
 	if(!hor) {
@@ -51,15 +56,17 @@ function BarChart(theData,h,w,hor)
 	if(hor) {
 		start = h - start -(GAPBETWEENBARS+STANDARDWIDTH);
 	}
-	for(aKey in aParsedJSON)
+	for(aBarIndex in this.itsEntityArray)
 	{
-	  var anEntity = new Bar(aKey,aParsedJSON[aKey],this,start,hor);
-	  anEntity.setFillColour(FILLCOLORS[(this.itsEntityArray.length)%FILLCOLORS.length]);
-	  this.itsEntityArray.push(anEntity);
-	  this.itsMaxUnits=this.itsMaxUnits>anEntity.itsUnits?this.itsMaxUnits:anEntity.itsUnits;
-	  if(!hor) {
+	  this.itsEntityArray[aBarIndex].setFillColour(FILLCOLORS[(aBarIndex)%FILLCOLORS.length]);
+	  this.itsEntityArray[aBarIndex].setCoordinate(start);
+	  this.itsMaxUnits=this.itsMaxUnits>this.itsEntityArray[aBarIndex].itsUnits?this.itsMaxUnits:this.itsEntityArray[aBarIndex].itsUnits;
+	  if(!hor)
+	  {
 		start+=(GAPBETWEENBARS+STANDARDWIDTH);
-	  } else {
+	  }
+	  else
+	  {
 		start-=(GAPBETWEENBARS+STANDARDWIDTH);
 	  }
 	}
@@ -156,6 +163,14 @@ BarChart.prototype.getXAxis=function()
 }
 
 /**
+* Comparator used to compare the bars.
+*/
+BarChart.prototype.barComparator=function(theBar1,theBar2)
+{
+ 	return (theBar1.itsUnits-theBar2.itsUnits);
+}
+
+/**
 * Gets the rulers for the bar chart.
 */
 BarChart.prototype.getRulers=function()
@@ -187,13 +202,12 @@ BarChart.prototype.getRulers=function()
 /**
 * Class representing each Bar in the chart.
 */
-function Bar(theName,theUnits,theOwner,coOrd,hor)
+function Bar(theName,theUnits,theOwner,hor)
 {
 	this.isHor=hor;
     this.itsName=theName;
 	this.itsUnits=theUnits;
 	this.itsOwner=theOwner;
-	this.coOrdinate=coOrd;
 }
 
 /**
@@ -224,6 +238,14 @@ Bar.prototype.getBarElementForSVG=function()
 }
 
 /**
+* Sets the coordinate
+*/
+Bar.prototype.setCoordinate=function(theCoordinate)
+{
+ this.itsCoordinate = theCoordinate;
+}
+
+/**
 * Gets the Y of the top-left of the bar represented by this instance.
 */
 Bar.prototype.getY=function()
@@ -232,7 +254,7 @@ Bar.prototype.getY=function()
 	// -1 ensures that the bars doesn't overlap with x-axis
 	return this.itsOwner.getHeight()-this.getHeight()-1;
   } else {
-	return this.coOrdinate;
+	return this.itsCoordinate;
   }
 }
 
@@ -242,7 +264,7 @@ Bar.prototype.getY=function()
 Bar.prototype.getX=function()
 {
   if(!this.isHor) {
-	return this.coOrdinate;
+	return this.itsCoordinate;
   } else {
 	return 1;
   }
